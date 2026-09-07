@@ -3,8 +3,8 @@
 A neon glow Pong with light trails, black background, score counter, and two modes:
 **Normal** (first to 11) and **Endless** (runs until you quit).
 
-> **STATUS: PLANNING (no code yet).** This repo currently holds the analysis,
-> game design, and roadmap. Code lands in `code/` after we review the approach.
+> **STATUS: POC BUILT — logic verified, visual review pending.** See
+> `docs/RESULTS.md` for what was built and what to check.
 
 ## The look
 
@@ -54,9 +54,10 @@ neoluminous-pong/
 │   ├── ANALYSIS.md         ← tech options compared + recommendation
 │   ├── GAME-DESIGN.md      ← entities, physics, collision, scoring, state machine
 │   ├── NEON-RENDERING.md   ← how the glow + light trails work
-│   ├── PLAN.md             ← step-by-step implementation plan (approved gate)
+│   ├── PLAN.md             ← step-by-step implementation plan (approved)
+│   ├── RESULTS.md          ← build results, verification, review checklist
 │   └── ROADMAP.md          ← POC scope vs. later
-├── code/                   ← (empty; single-file POC goes here after review)
+├── code/                   ← the game: index.html + style.css + game.js
 ├── screenshots/            ← captures of running game
 └── temp/                   ← scratch files, never committed beyond need
 ```

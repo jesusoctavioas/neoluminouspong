@@ -4,17 +4,17 @@
 
 The single proof-of-concept target. All vanilla Canvas2D, 3 files in `code/`.
 
-- [x] *docs complete (this repo state)*
-- [ ] `code/index.html`, `code/style.css`, `code/game.js`
-- [ ] 2 players, keyboard (W/S + arrows), single keyboard local
-- [ ] Pong physics: wall bounce, paddle bounce w/ angle, serve, score detect
-- [ ] Neon glow (shadowBlur) + color-matched light trails (ball + both paddles)
-- [ ] Score counter (DOM), center line, winner banner
-- [ ] **Normal** mode: first to 11 → winner → restart
-- [ ] **Endless** mode: no win, runs until `Esc`
-- [ ] Menu: mode select, start
-- [ ] Web Audio blips on bounce/score (tiny, toggle later)
-- [ ] First screenshots → `screenshots/`
+- [x] *docs complete (analysis, design, plan, results)*
+- [x] `code/index.html`, `code/style.css`, `code/game.js`
+- [x] 2 players, keyboard (W/S + arrows), single keyboard local
+- [x] Pong physics: wall bounce, paddle bounce w/ angle, serve, score detect
+- [x] Neon glow (shadowBlur) + color-matched light trails (ball + both paddles)
+- [x] Score counter (DOM), center line, winner banner
+- [x] **Normal** mode: first to 11 → winner → restart
+- [x] **Endless** mode: no win, runs until `Esc`
+- [x] Menu: mode select, start
+- [x] Web Audio blips on bounce/score (tiny, toggle later)
+- [ ] Screenshots once visual review is done → `screenshots/`
 
 **Definition of done:** open `code/index.html` in a browser, pick a mode, two
 people on one keyboard rally with glowing trails, someone hits 11 and it
