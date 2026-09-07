@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Neoluminous Pong</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="stage">
+    <canvas id="game" width="800" height="500"></canvas>
+    <div id="overlay">
+      <div id="mode"></div>
+      <div id="score-l">0</div>
+      <div id="score-r">0</div>
+      <div id="banner"></div>
+      <div id="menu" class="hidden">
+        <h1>NEOLUMINOUS PONG</h1>
+        <div id="mode-select">
+          <span id="opt-1" class="sel">1 &middot; NORMAL</span>
+          <span id="opt-2">2 &middot; ENDLESS</span>
+        </div>
+        <p>ENTER TO START &middot; W/S + &uarr;/&darr; TO PLAY &middot; SPACE SERVES &middot; ESC QUIT</p>
+      </div>
+    </div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>

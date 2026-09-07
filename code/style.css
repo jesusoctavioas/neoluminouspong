@@ -1,0 +1,50 @@
+/* Neoluminous Pong — page chrome + neon text. Canvas does the field. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; background: #000; }
+body {
+  display: flex; align-items: center; justify-content: center;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  -webkit-user-select: none; user-select: none;
+}
+
+#stage { position: relative; width: min(800px, 96vw); }
+canvas {
+  display: block; width: 100%; height: auto; background: #000;
+  border: 1px solid #101a3c; border-radius: 6px;
+  box-shadow: 0 0 48px rgba(30, 50, 140, 0.35);
+}
+
+#overlay { position: absolute; inset: 0; pointer-events: none; }
+
+#score-l, #score-r {
+  position: absolute; top: 14px; font-size: 54px; font-weight: 700;
+}
+#score-l { left: 70px; color: #00f0ff;  text-shadow: 0 0 10px #00f0ff,  0 0 34px #00f0ff;  }
+#score-r { right: 70px; color: #ff2bd6; text-shadow: 0 0 10px #ff2bd6,  0 0 34px #ff2bd6; }
+
+#mode {
+  position: absolute; top: 34px; left: 50%; transform: translateX(-50%);
+  font-size: 11px; letter-spacing: 5px; color: #33406e;
+}
+
+#banner {
+  position: absolute; top: 52%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 24px; letter-spacing: 3px; color: #e8ecff; white-space: nowrap;
+  text-shadow: 0 0 14px #4d7cff, 0 0 40px #4d7cff;
+}
+
+#menu {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 22px;
+}
+#menu h1 {
+  font-size: 30px; letter-spacing: 7px; color: #e8ecff;
+  text-shadow: 0 0 12px #00f0ff, 0 0 36px #ff2bd6;
+}
+#mode-select { display: flex; gap: 52px; font-size: 15px; letter-spacing: 2px; }
+#mode-select span { color: #33406e; }
+#mode-select span.sel { color: #e8ecff; text-shadow: 0 0 10px #00f0ff, 0 0 26px #00f0ff; }
+#menu p { font-size: 10px; letter-spacing: 2px; color: #33406e; }
+
+.hidden { display: none !important; }
