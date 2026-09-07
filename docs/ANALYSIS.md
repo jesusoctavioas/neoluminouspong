@@ -87,5 +87,5 @@ code/
 └── game.js       # all game logic + rendering (state machine, physics, draw)
 ```
 
-Decision needed in review: single file vs 3-file (default 3-file), and whether
-to include Web Audio beeps in the POC (default: yes, tiny — it sells the feel).
+**Decision (confirmed by Octavio):** 3-file split; Web Audio blips included.
+Full implementation plan: see `docs/PLAN.md`.

@@ -54,6 +54,7 @@ neoluminous-pong/
 │   ├── ANALYSIS.md         ← tech options compared + recommendation
 │   ├── GAME-DESIGN.md      ← entities, physics, collision, scoring, state machine
 │   ├── NEON-RENDERING.md   ← how the glow + light trails work
+│   ├── PLAN.md             ← step-by-step implementation plan (approved gate)
 │   └── ROADMAP.md          ← POC scope vs. later
 ├── code/                   ← (empty; single-file POC goes here after review)
 ├── screenshots/            ← captures of running game
