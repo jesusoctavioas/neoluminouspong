@@ -22,7 +22,7 @@ globalThis.devicePixelRatio = 1;
 const src = fs.readFileSync(path.join(__dirname, '..', 'code', 'game.js'), 'utf8');
 const game = new Function(
   'window', 'document', 'addEventListener', 'requestAnimationFrame',
-  src + '\n;return { state: () => state, score: () => score, pointMsg: () => pointMsg, mode: () => mode, ball: () => ball, left: () => left, right: () => right };\n'
+  src + '\n;return { state: () => state, score: () => score, pointMsg: () => pointMsg, mode: () => mode, opp: () => opp, ball: () => ball, left: () => left, right: () => right };\n'
 )(
   globalThis,
   { getElementById: id => id === 'game' ? canvas : (els[id] || (els[id] = mkEl())) },
@@ -81,8 +81,10 @@ assert.strictEqual(game.state(), 'serve');
 assert.strictEqual(game.score().l + game.score().r, 0);
 key('Escape');
 assert.strictEqual(game.state(), 'menu');
-// 7. endless: 4 points, never 'over', Esc → menu
-key('Digit2'); assert.strictEqual(game.mode(), 'endless');
+// 7. endless (2 players): 4 points, never 'over', Esc → menu
+key('Digit3');
+assert.strictEqual(game.mode(), 'endless');
+assert.strictEqual(game.opp(), 'human');
 key('Enter'); key('Space');
 for (let i = 0; i < 4; i++) {
   playToNext();
@@ -93,5 +95,19 @@ for (let i = 0; i < 4; i++) {
 }
 key('Escape');
 assert.strictEqual(game.state(), 'menu');
+// 8. AI opponent: right paddle must track the ball
+key('Digit4');
+assert.strictEqual(game.mode(), 'endless');
+assert.strictEqual(game.opp(), 'ai');
+key('Enter'); key('Space');
+game.ball().vy = -60;                  // deterministic upward drift
+let minY = 1e9;
+for (let i = 0; i < 200; i++) {
+  step(16.7);
+  minY = Math.min(minY, game.right().y);
+}
+assert.ok(minY < 245, 'AI paddle must track the ball (min y ' + minY.toFixed(1) + ')');
+key('Escape');
+assert.strictEqual(game.state(), 'menu');
 
-console.log('PASS — menu → Normal to 11 (win %d:%d) → rematch → Endless (no win) → menu', winL, winR);
+console.log('PASS — menu → Normal to 11 (win %d:%d) → rematch → Endless 2P (no win) → AI tracks ball → menu', winL, winR);

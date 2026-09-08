@@ -18,6 +18,8 @@ const GLOW_SHAPE   = 18;            // shadowBlur for shapes
 const GLOW_TRAIL   = 14;            // shadowBlur at trail head
 const POINT_END_DELAY = 1.0;        // s
 const WIN_SCORE    = 11;            // strict first-to-11 (Normal mode)
+const AI_SPEED     = 400;           // px/s — under PADDLE_SPEED: beatable at high speed
+const AI_DEADZONE  = 6;             // px of slack before the AI commits to a move
 const AUD = { paddle: 520, wall: 260, score: 880, serve: 330 };  // Hz, ~60 ms sine
 
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
@@ -35,14 +37,14 @@ const el = {
   mode:   document.getElementById('mode'),
   banner: document.getElementById('banner'),
   menu:   document.getElementById('menu'),
-  optN:   document.getElementById('opt-1'),
-  optE:   document.getElementById('opt-2'),
+  opt: [1, 2, 3, 4].map(n => document.getElementById('opt-' + n)),
 };
 
 // ── 3. STATE ─────────────────────────────────────────────────────────────
 const ST = { MENU: 'menu', SERVE: 'serve', PLAY: 'play', POINT: 'point', OVER: 'over' };
 let state = ST.MENU;
 let mode = 'normal';                 // 'normal' | 'endless'
+let opp = 'human';                   // right paddle: 'human' | 'ai'
 let paused = false;
 let pointTimer = 0;
 let pointMsg = '';
@@ -66,8 +68,13 @@ addEventListener('blur', () => keys.clear());
 
 function onKeyDown(code) {
   if (state === ST.MENU) {
-    if (code === 'Digit1') setMode('normal');
-    else if (code === 'Digit2') setMode('endless');
+    const picks = {                                        // key → [matchMode, opponent]
+      Digit1: ['normal',  'human'],                        // human vs human
+      Digit2: ['normal',  'ai'],                           // vs computer
+      Digit3: ['endless', 'human'],                        // endless, both human
+      Digit4: ['endless', 'ai'],                           // endless vs computer
+    };
+    if (picks[code]) { mode = picks[code][0]; opp = picks[code][1]; syncUI(); }
     else if (code === 'Enter') startMatch();
   } else if (state === ST.SERVE) {
     if (code === 'Space') serve();
@@ -159,7 +166,8 @@ function blip(freq) {
 function update(dt) {
   if ((state === ST.SERVE || state === ST.PLAY) && !paused) {
     movePaddle(left,  PADDLE_SPEED * dt * ((keys.has('KeyS') ? 1 : 0) - (keys.has('KeyW') ? 1 : 0)));
-    movePaddle(right, PADDLE_SPEED * dt * ((keys.has('ArrowDown') ? 1 : 0) - (keys.has('ArrowUp') ? 1 : 0)));
+    if (opp === 'ai') moveAI(right, dt);
+    else movePaddle(right, PADDLE_SPEED * dt * ((keys.has('ArrowDown') ? 1 : 0) - (keys.has('ArrowUp') ? 1 : 0)));
     for (const p of [left, right]) {
       p.trail.push({ x: p.x + p.w / 2, y: p.y + p.h / 2 });
       if (p.trail.length > TRAIL_LEN) p.trail.shift();
@@ -170,6 +178,15 @@ function update(dt) {
 }
 
 function movePaddle(p, dy) { p.y = clamp(p.y + dy, 0, H - p.h); }
+
+// Computer pilot (right paddle): tracks the ball through its center with a
+// dead-zone so it doesn't jitter, and moves at AI_SPEED (< PADDLE_SPEED) so a
+// fast angled rally still beats it.
+function moveAI(p, dt) {
+  const d = ball.y - (p.y + p.h / 2);
+  if (Math.abs(d) <= AI_DEADZONE) return;
+  movePaddle(p, Math.sign(d) * Math.min(AI_SPEED * dt, Math.abs(d)));
+}
 
 function updateBall(dt) {
   ball.x += ball.vx * dt;
@@ -278,10 +295,10 @@ function neonCircle(b) {
 function syncUI() {
   el.scoreL.textContent = score.l;
   el.scoreR.textContent = score.r;
-  el.mode.textContent = mode.toUpperCase();
+  el.mode.textContent = mode.toUpperCase() + (opp === 'ai' ? ' · CPU' : '');
   el.mode.style.visibility = state === ST.MENU ? 'hidden' : 'visible';
-  el.optN.classList.toggle('sel', mode === 'normal');
-  el.optE.classList.toggle('sel', mode === 'endless');
+  const idx = (mode === 'endless' ? 2 : 0) + (opp === 'ai' ? 1 : 0);
+  el.opt.forEach((o, i) => o.classList.toggle('sel', i === idx));
   el.menu.classList.toggle('hidden', state !== ST.MENU);
   let msg = '';
   if (state === ST.SERVE) msg = 'SPACE TO SERVE';
