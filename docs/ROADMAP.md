@@ -14,7 +14,7 @@ The single proof-of-concept target. All vanilla Canvas2D, 3 files in `code/`.
 - [x] **Endless** mode: no win, runs until `Esc`
 - [x] Menu: mode select, start
 - [x] Web Audio blips on bounce/score (tiny, toggle later)
-- [ ] Screenshots once visual review is done → `screenshots/`
+- [x] Screenshots (`screenshots/01-menu.png`, `02-rally-vs-cpu.png`, `03-winner.png`)
 
 **Definition of done:** open `code/index.html` in a browser, pick a mode, two
 people on one keyboard rally with glowing trails, someone hits 11 and it
@@ -24,8 +24,9 @@ declares a winner (Normal) or it just keeps going (Endless).
 
 Each is a small, independent addition to the single file — no rebuild needed.
 
-- **AI opponent** — one key plays vs a simple tracking AI (ball.y follow with
-  dead-zone). Makes solo play + screenshots easy. *Highest-value next step.*
+- ~~AI opponent~~ — **done (slice 2)**: tracking AI, dead-zone, capped speed;
+  four-mode menu. See `docs/RESULTS-AI.md`.
+- **AI difficulty tiers / prediction / AI on the left side.**
 - **Mouse/touch** — one paddle follows the pointer; enables single-player.
 - **Win-margin to 2** — classic 11-point table-tennis rule (needs 2-lead).
 - **Sound toggle** (`M`) + a subtle menu music loop.

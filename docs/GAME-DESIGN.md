@@ -87,11 +87,25 @@ Endless has no **over**: `Esc` just drops to **menu**.
 | `↑`/`↓` | right paddle up/down                    |
 | `Space`| serve (serving) / pause-resume (playing) |
 | `Enter`| start (menu→serving) / restart (over)     |
-| `1`/`2`  | choose Normal / Endless (menu)           |
+| `1`/`2`/`3`/`4`  | match type (menu): 1 human+human, 2 vs CPU, 3 endless 2P, 4 endless vs CPU |
 | `Esc`    | endless→menu, over→menu                  |
 
 Key state is a `Set` of currently-held codes; movement reads it each frame
 (no repeat-delay). Pausing during **playing** is a sub-flag, not a new state.
+
+In CPU modes the right paddle ignores `↑`/`↓` — the AI owns it.
+
+## Opponent AI (right/magenta paddle)
+
+`moveAI(p, dt)` tracks the ball's y through the paddle's center:
+
+- speed `AI_SPEED = 400 px/s` (human is 450 — the CPU is *capped*, so fast
+  angled rallies beat it),
+- `AI_DEADZONE = 6 px` of slack so it doesn't jitter when level with the ball,
+- pure chase: no prediction, no anticipation, no difficulty tiers (roadmap).
+
+Runs in `SERVE` and `PLAY` like human paddles; re-centers on each serve;
+leaves a magenta trail like everything else.
 
 ## Rendering order (per frame)
 
@@ -102,10 +116,12 @@ Key state is a `Set` of currently-held codes; movement reads it each frame
 
 ## POC scope (build now)
 
-Everything above: 2 players, keyboard, both modes, score, win, neon+trails,
-optional Web Audio blips.
+Everything above, plus the **opponent AI** (section above) and the four-mode
+menu (1 human+human · 2 vs CPU · 3 endless 2P · 4 endless vs CPU): keyboard,
+both match lengths, score, win, neon+trails, Web Audio blips.
 
 ## Explicitly deferred (see ROADMAP.md)
 
-AI opponent, mouse/touch control, sound toggle, match-to-11-then-2 margin,
-high-score persistence, screen shake, particle burst on hit.
+mouse/touch control, AI difficulty tiers/prediction, AI on the left side,
+sound toggle, match-to-11-then-2 margin, high-score persistence, screen
+shake, particle burst on hit.

@@ -32,18 +32,22 @@ That's it — a browser tab is all you need. (Screenshots/short capture go in
 | `↑` / `↓`  | Move right paddle up / down      |
 | `Space`    | Serve ball / pause               |
 | `Enter`    | Play (start a match)             |
-| `1` / `2`  | Pick Normal / Endless mode       |
+| `1` / `2` / `3` / `4` | Pick match type (see Modes)     |
 | `Esc`      | Quit Endless / back to menu      |
 
 Single-keyboard 2-player local is the POC default. Mouse control for one side
 and AI for the other is a roadmap item (see `docs/ROADMAP.md`).
 
-## Modes
+## Modes (menu select with 1–4)
 
-- **Normal** — classic: first to **11** points wins the match, then a winner
+- **1 · Human vs Human** — Normal: first to **11** points wins, then a winner
   banner and a restart prompt.
-- **Endless** — no winner; play until a player presses `Esc`. Score climbs
-  forever, great for chasing the fastest rally / highest speed streak.
+- **2 · VS Computer** — Normal; the CPU pilots the right (magenta) paddle.
+  It chases the ball at 400 px/s with no prediction — beat it with sharp
+  angled shots once the rally speeds up.
+- **3 · Endless — 2 Players** — no winner; play until `Esc`. Score climbs
+  forever.
+- **4 · Endless — VS Computer** — endless vs the CPU. Score climbs forever.
 
 ## Folder map
 
@@ -56,6 +60,7 @@ neoluminous-pong/
 │   ├── NEON-RENDERING.md   ← how the glow + light trails work
 │   ├── PLAN.md             ← step-by-step implementation plan (approved)
 │   ├── RESULTS.md          ← build results, verification, review checklist
+│   ├── RESULTS-AI.md       ← slice 2: computer opponent + screenshots
 │   └── ROADMAP.md          ← POC scope vs. later
 ├── code/                   ← the game: index.html + style.css + game.js
 ├── screenshots/            ← captures of running game

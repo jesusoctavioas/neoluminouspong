@@ -63,11 +63,8 @@ Nothing dropped. No roadmap items added.
 
 ## Screenshots
 
-**Pending your review.** `screencapture` from this process returned a black
-frame (no screen-recording permission for the agent's terminal process —
-macOS TCC, not a game bug). Easiest: while playing, `⇧⌘4` for menu, mid-rally,
-and winner shots; drop them in `screenshots/` (or say the word and I'll retry
-the capture once permission is granted).
+**Done — see `screenshots/`** (captured during slice 2 with Chrome headless;
+see `docs/RESULTS-AI.md` for how).
 
 ## What to check in your playthrough
 
