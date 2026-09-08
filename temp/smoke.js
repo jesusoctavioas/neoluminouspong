@@ -22,7 +22,7 @@ globalThis.devicePixelRatio = 1;
 const src = fs.readFileSync(path.join(__dirname, '..', 'code', 'game.js'), 'utf8');
 const game = new Function(
   'window', 'document', 'addEventListener', 'requestAnimationFrame',
-  src + '\n;return { state: () => state, score: () => score, pointMsg: () => pointMsg, mode: () => mode, opp: () => opp, ball: () => ball, left: () => left, right: () => right };\n'
+  src + '\n;return { state: () => state, score: () => score, pointMsg: () => pointMsg, mode: () => mode, opp: () => opp, diff: () => diff, sel: () => sel, ball: () => ball, left: () => left, right: () => right };\n'
 )(
   globalThis,
   { getElementById: id => id === 'game' ? canvas : (els[id] || (els[id] = mkEl())) },
@@ -82,7 +82,7 @@ assert.strictEqual(game.score().l + game.score().r, 0);
 key('Escape');
 assert.strictEqual(game.state(), 'menu');
 // 7. endless (2 players): 4 points, never 'over', Esc → menu
-key('Digit3');
+key('Digit5');
 assert.strictEqual(game.mode(), 'endless');
 assert.strictEqual(game.opp(), 'human');
 key('Enter'); key('Space');
@@ -95,10 +95,11 @@ for (let i = 0; i < 4; i++) {
 }
 key('Escape');
 assert.strictEqual(game.state(), 'menu');
-// 8. AI opponent: right paddle must track the ball
-key('Digit4');
+// 8. AI opponent (medium): right paddle must track the ball
+key('Digit7');
 assert.strictEqual(game.mode(), 'endless');
 assert.strictEqual(game.opp(), 'ai');
+assert.strictEqual(game.diff(), 'medium');
 key('Enter'); key('Space');
 game.ball().vy = -60;                  // deterministic upward drift
 let minY = 1e9;
@@ -109,5 +110,29 @@ for (let i = 0; i < 200; i++) {
 assert.ok(minY < 245, 'AI paddle must track the ball (min y ' + minY.toFixed(1) + ')');
 key('Escape');
 assert.strictEqual(game.state(), 'menu');
+// 9. menu navigation: numbers + arrows (with wrap), selection drives start
+key('Digit1');
+assert.strictEqual(game.sel(), 0);
+assert.strictEqual(game.opp(), 'human');
+assert.strictEqual(game.diff(), null);
+key('ArrowDown');
+assert.strictEqual(game.sel(), 1);
+key('ArrowDown');
+assert.strictEqual(game.sel(), 2);
+assert.strictEqual(game.mode(), 'normal');
+assert.strictEqual(game.diff(), 'medium');   // row 3 = vs computer — medium
+key('ArrowUp');
+assert.strictEqual(game.sel(), 1);
+assert.strictEqual(game.diff(), 'easy');
+key('ArrowUp');                               // index 1 → index 0
+assert.strictEqual(game.sel(), 0);
+key('ArrowUp');                               // wrap to last row
+assert.strictEqual(game.sel(), 7);
+assert.strictEqual(game.mode(), 'endless');
+assert.strictEqual(game.diff(), 'hard');
+key('Enter');
+assert.strictEqual(game.state(), 'serve');
+key('Escape');
+assert.strictEqual(game.state(), 'menu');
 
-console.log('PASS — menu → Normal to 11 (win %d:%d) → rematch → Endless 2P (no win) → AI tracks ball → menu', winL, winR);
+console.log('PASS — menu → Normal to 11 (win %d:%d) → rematch → Endless 2P (no win) → AI(medium) tracks ball → menu nav + wrap → menu', winL, winR);

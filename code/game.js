@@ -13,14 +13,32 @@ const SERVE_ANGLE  = 30 * Math.PI / 180;  // random serve heading within ±30°
 const HIT_SPEEDUP  = 1.06;
 const SPEED_CAP    = 600;
 const MAX_ANGLE    = 60 * Math.PI / 180;  // max deflection off a paddle
-const TRAIL_LEN    = 16;            // frames of history per object
+const TRAIL_LEN    = 16;            // frames of history (paddles)
+const BALL_TRAIL_LEN = 32;          // ball gets twice the history — longer comet
 const GLOW_SHAPE   = 18;            // shadowBlur for shapes
-const GLOW_TRAIL   = 14;            // shadowBlur at trail head
+const GLOW_TRAIL   = 14;            // shadowBlur at trail head (paddles)
+const GLOW_TRAIL_BALL = 22;         // stronger glow at the ball trail head
 const POINT_END_DELAY = 1.0;        // s
 const WIN_SCORE    = 11;            // strict first-to-11 (Normal mode)
-const AI_SPEED     = 400;           // px/s — under PADDLE_SPEED: beatable at high speed
-const AI_DEADZONE  = 6;             // px of slack before the AI commits to a move
 const AUD = { paddle: 520, wall: 260, score: 880, serve: 330 };  // Hz, ~60 ms sine
+// AI difficulty: EASY is slow and sloppy, MEDIUM is the old feel softened,
+// HARD is the previous 400/6 behavior — the one that felt too strong.
+const AI = {
+  easy:   { speed: 220, dead: 20 },
+  medium: { speed: 330, dead: 10 },
+  hard:   { speed: 430, dead: 4 },
+};
+// Menu rows — key 1..8. [matchLength, opponent, aiDifficulty]
+const MODES = [
+  ['normal',  'human', null],       // 1 · HUMAN VS HUMAN
+  ['normal',  'ai',    'easy'],     // 2 · VS COMPUTER — EASY
+  ['normal',  'ai',    'medium'],   // 3 · VS COMPUTER — MEDIUM
+  ['normal',  'ai',    'hard'],     // 4 · VS COMPUTER — HARD
+  ['endless', 'human', null],       // 5 · ENDLESS — 2 PLAYERS
+  ['endless', 'ai',    'easy'],     // 6 · ENDLESS VS COMPUTER — EASY
+  ['endless', 'ai',    'medium'],   // 7 · ENDLESS VS COMPUTER — MEDIUM
+  ['endless', 'ai',    'hard'],     // 8 · ENDLESS VS COMPUTER — HARD
+];
 
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 
@@ -37,7 +55,7 @@ const el = {
   mode:   document.getElementById('mode'),
   banner: document.getElementById('banner'),
   menu:   document.getElementById('menu'),
-  opt: [1, 2, 3, 4].map(n => document.getElementById('opt-' + n)),
+  opt: [1, 2, 3, 4, 5, 6, 7, 8].map(n => document.getElementById('opt-' + n)),
 };
 
 // ── 3. STATE ─────────────────────────────────────────────────────────────
@@ -45,6 +63,8 @@ const ST = { MENU: 'menu', SERVE: 'serve', PLAY: 'play', POINT: 'point', OVER: '
 let state = ST.MENU;
 let mode = 'normal';                 // 'normal' | 'endless'
 let opp = 'human';                   // right paddle: 'human' | 'ai'
+let diff = null;                     // 'easy' | 'medium' | 'hard' | null (no AI)
+let sel = 0;                         // selected menu row (0-based)
 let paused = false;
 let pointTimer = 0;
 let pointMsg = '';
@@ -68,13 +88,9 @@ addEventListener('blur', () => keys.clear());
 
 function onKeyDown(code) {
   if (state === ST.MENU) {
-    const picks = {                                        // key → [matchMode, opponent]
-      Digit1: ['normal',  'human'],                        // human vs human
-      Digit2: ['normal',  'ai'],                           // vs computer
-      Digit3: ['endless', 'human'],                        // endless, both human
-      Digit4: ['endless', 'ai'],                           // endless vs computer
-    };
-    if (picks[code]) { mode = picks[code][0]; opp = picks[code][1]; syncUI(); }
+    if (code >= 'Digit1' && code <= 'Digit8') select(+code.slice(5) - 1);   // 0-based row
+    else if (code === 'ArrowUp')    select(sel - 1);          // wraps around
+    else if (code === 'ArrowDown')  select(sel + 1);
     else if (code === 'Enter') startMatch();
   } else if (state === ST.SERVE) {
     if (code === 'Space') serve();
@@ -90,7 +106,12 @@ function onKeyDown(code) {
   }
 }
 
-function setMode(m) { mode = m; syncUI(); }
+function select(i) {
+  sel = (i + MODES.length) % MODES.length;                  // wrap both ways
+  const m = MODES[sel];
+  mode = m[0]; opp = m[1]; diff = m[2];
+  syncUI();
+}
 function toMenu() { state = ST.MENU; paused = false; syncUI(); }
 
 function startMatch() {
@@ -183,16 +204,17 @@ function movePaddle(p, dy) { p.y = clamp(p.y + dy, 0, H - p.h); }
 // dead-zone so it doesn't jitter, and moves at AI_SPEED (< PADDLE_SPEED) so a
 // fast angled rally still beats it.
 function moveAI(p, dt) {
+  const a = AI[diff];
   const d = ball.y - (p.y + p.h / 2);
-  if (Math.abs(d) <= AI_DEADZONE) return;
-  movePaddle(p, Math.sign(d) * Math.min(AI_SPEED * dt, Math.abs(d)));
+  if (Math.abs(d) <= a.dead) return;
+  movePaddle(p, Math.sign(d) * Math.min(a.speed * dt, Math.abs(d)));
 }
 
 function updateBall(dt) {
   ball.x += ball.vx * dt;
   ball.y += ball.vy * dt;
   ball.trail.push({ x: ball.x, y: ball.y });
-  if (ball.trail.length > TRAIL_LEN) ball.trail.shift();
+  if (ball.trail.length > BALL_TRAIL_LEN) ball.trail.shift();
 
   // wall bounce (abs() guards against double-flip if a frame overshoots)
   if (ball.y - ball.r < 0)      { ball.y = ball.r;    ball.vy = Math.abs(ball.vy);  blip(AUD.wall); }
@@ -245,9 +267,9 @@ function render() {
 
   // additive pass: trails first (under), glowing shapes on top
   ctx.globalCompositeOperation = 'lighter';
-  drawTrail(left.trail, left.color);
-  drawTrail(right.trail, right.color);
-  drawTrail(ball.trail, ball.color);
+  drawTrail(left.trail, left.color,  1.0, 0.55, GLOW_TRAIL);
+  drawTrail(right.trail, right.color, 1.0, 0.55, GLOW_TRAIL);
+  drawTrail(ball.trail, ball.color,  1.7, 0.85, GLOW_TRAIL_BALL);
   neonRect(left);
   neonRect(right);
   neonCircle(ball);
@@ -255,15 +277,15 @@ function render() {
   ctx.globalAlpha = 1;
 }
 
-function drawTrail(tr, color) {
+function drawTrail(tr, color, wMul, alpha, glow) {
   if (tr.length < 2) return;
   ctx.lineCap = 'round';
   ctx.strokeStyle = color;
   for (let i = 1; i < tr.length; i++) {
     const t = i / tr.length;                                   // 0 tail → 1 head
-    ctx.globalAlpha = t * 0.55;
-    ctx.lineWidth = t * ball.r * 1.6 + 1;
-    ctx.shadowBlur = GLOW_TRAIL * t;
+    ctx.globalAlpha = t * alpha;
+    ctx.lineWidth = t * ball.r * 1.6 * wMul + 1;
+    ctx.shadowBlur = glow * t;
     ctx.shadowColor = color;
     ctx.beginPath();
     ctx.moveTo(tr[i - 1].x, tr[i - 1].y);
@@ -295,10 +317,9 @@ function neonCircle(b) {
 function syncUI() {
   el.scoreL.textContent = score.l;
   el.scoreR.textContent = score.r;
-  el.mode.textContent = mode.toUpperCase() + (opp === 'ai' ? ' · CPU' : '');
+  el.mode.textContent = mode.toUpperCase() + (opp === 'ai' ? ' · CPU · ' + diff.toUpperCase() : '');
   el.mode.style.visibility = state === ST.MENU ? 'hidden' : 'visible';
-  const idx = (mode === 'endless' ? 2 : 0) + (opp === 'ai' ? 1 : 0);
-  el.opt.forEach((o, i) => o.classList.toggle('sel', i === idx));
+  el.opt.forEach((o, i) => o.classList.toggle('sel', i === sel));
   el.menu.classList.toggle('hidden', state !== ST.MENU);
   let msg = '';
   if (state === ST.SERVE) msg = 'SPACE TO SERVE';
