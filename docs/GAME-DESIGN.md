@@ -84,10 +84,10 @@ Endless has no **over**: `Esc` just drops to **menu**.
 | Key    | Effect                                   |
 |--------|------------------------------------------|
 | `W`/`S`  | left paddle up/down                      |
-| `↑`/`↓` | right paddle up/down                    |
+| `↑`/`↓` | right paddle up/down · **in menu: move selection (wraps)** |
 | `Space`| serve (serving) / pause-resume (playing) |
 | `Enter`| start (menu→serving) / restart (over)     |
-| `1`/`2`/`3`/`4`  | match type (menu): 1 human+human, 2 vs CPU, 3 endless 2P, 4 endless vs CPU |
+| `1`–`8` | jump straight to a menu row (see rows below)                |
 | `Esc`    | endless→menu, over→menu                  |
 
 Key state is a `Set` of currently-held codes; movement reads it each frame
@@ -97,12 +97,17 @@ In CPU modes the right paddle ignores `↑`/`↓` — the AI owns it.
 
 ## Opponent AI (right/magenta paddle)
 
-`moveAI(p, dt)` tracks the ball's y through the paddle's center:
+`moveAI(p, dt)` tracks the ball's y through the paddle's center, with
+per-difficulty speed + dead-zone (constants at the top of `game.js`):
 
-- speed `AI_SPEED = 400 px/s` (human is 450 — the CPU is *capped*, so fast
-  angled rallies beat it),
-- `AI_DEADZONE = 6 px` of slack so it doesn't jitter when level with the ball,
-- pure chase: no prediction, no anticipation, no difficulty tiers (roadmap).
+| Tier   | Speed (px/s) | Dead-zone (px) | Feel                                        |
+|--------|--------------|----------------|---------------------------------------------|
+| EASY   | 220          | 20             | slow + sloppy; loses to anything angled     |
+| MEDIUM | 330          | 10             | fair fight; beat with sharp late angles     |
+| HARD   | 430          | 4              | the old 400/6 behavior — the "too strong" one |
+
+Pure chase: no prediction, no anticipation. A human (450 px/s) is faster than
+the CPU at every tier — the fight is about angles, not raw speed.
 
 Runs in `SERVE` and `PLAY` like human paddles; re-centers on each serve;
 leaves a magenta trail like everything else.
@@ -116,12 +121,14 @@ leaves a magenta trail like everything else.
 
 ## POC scope (build now)
 
-Everything above, plus the **opponent AI** (section above) and the four-mode
-menu (1 human+human · 2 vs CPU · 3 endless 2P · 4 endless vs CPU): keyboard,
-both match lengths, score, win, neon+trails, Web Audio blips.
+Everything above, plus the **opponent AI** (section above) with three
+difficulty tiers and the eight-row menu:
+1 human+human · 2–4 vs CPU easy/medium/hard · 5 endless 2P · 6–8 endless
+vs CPU easy/medium/hard. Keyboard, both match lengths, score, win,
+neon+trails (ball trail: 32 frames, extra glow), Web Audio blips.
 
 ## Explicitly deferred (see ROADMAP.md)
 
-mouse/touch control, AI difficulty tiers/prediction, AI on the left side,
-sound toggle, match-to-11-then-2 margin, high-score persistence, screen
-shake, particle burst on hit.
+mouse/touch control, AI prediction, AI on the left side, per-player sound
+toggle, match-to-11-then-2 margin, high-score persistence, screen shake,
+particle burst on hit.

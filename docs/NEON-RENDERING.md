@@ -65,7 +65,7 @@ the object's neon color → a comet streak.
 ```js
 // push current pos every frame (cap the array):
 ball.trail.push({ x: ball.x, y: ball.y });
-if (ball.trail.length > TRAIL_LEN) ball.trail.shift();   // TRAIL_LEN ≈ 16
+if (ball.trail.length > TRAIL_LEN) ball.trail.shift();   // ball: 32 frames · paddles: 16
 
 function drawTrail(trail, color) {
   ctx.globalCompositeOperation = 'lighter';   // additive = glowy streak
@@ -88,7 +88,10 @@ function drawTrail(trail, color) {
 
 - **Per-object color** → ball streaks blue, left paddle cyan, right paddle
   magenta. Exactly the brief.
-- `TRAIL_LEN ~ 16` at 60 fps ≈ 0.27 s of history. Longer = more drama.
+- Trail length: ball 32 frames (~0.53 s, the long comet), paddles 16
+  (~0.27 s wakes), at 60 fps. Ball trail also gets higher alpha (0.85 vs
+  0.55), 1.7× width, and a stronger head glow (blur 22 vs 14) — the ball is
+  the hero of the effect.
 - Paddles trail too (the brief says paddles **and** balls). Their streaks are
   short vertical smears — looks like an energy wake. Cheap: same function.
 - On **score / serve**, clear each object's trail so it doesn't streak across

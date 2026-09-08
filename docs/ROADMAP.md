@@ -26,7 +26,11 @@ Each is a small, independent addition to the single file — no rebuild needed.
 
 - ~~AI opponent~~ — **done (slice 2)**: tracking AI, dead-zone, capped speed;
   four-mode menu. See `docs/RESULTS-AI.md`.
-- **AI difficulty tiers / prediction / AI on the left side.**
+- ~~AI difficulty tiers~~ — **done (slice 3)**: EASY/MEDIUM/HARD (220/330/430 px/s);
+  menu extended to 8 rows, ↑/↓ + 1–8 selection. See `docs/RESULTS-UX.md`.
+- ~~More light on the ball trail~~ — **done (slice 3)**: 32-frame comet,
+  brighter/wider/glowier than paddle wakes.
+- **AI prediction / AI on the left side.**
 - **Mouse/touch** — one paddle follows the pointer; enables single-player.
 - **Win-margin to 2** — classic 11-point table-tennis rule (needs 2-lead).
 - **Sound toggle** (`M`) + a subtle menu music loop.
